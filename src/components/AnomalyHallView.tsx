@@ -7,280 +7,29 @@ import {
   Boxes,
   XCircle,
 } from 'lucide-react';
+import {
+  ALERT_TREND_DAYS,
+  DYNAMIC_ALERT_TREND_DAYS,
+  LATEST_ALERTS,
+  DYNAMIC_LATEST_ALERTS,
+  ALERT_LEVELS,
+  filterAlertsByLevel,
+  countAlertsByLevel,
+  sumTrendAlerts,
+} from '../data/anomalyHall';
+import type { AlertLevel } from '../types/aiops';
 
 export const AnomalyHallView: React.FC = () => {
-  // 30-Day Alert Trends Mock Data for Section 1 (Recent dates in Oct 2026)
-  const alertTrendDays = [
-    { date: '10.01', alert: 3, major: 1, high: 1 },
-    { date: '10.02', alert: 6, major: 2, high: 1 },
-    { date: '10.03', alert: 2, major: 0, high: 1 },
-    { date: '10.04', alert: 3, major: 1, high: 0 },
-    { date: '10.05', alert: 8, major: 3, high: 2 },
-    { date: '10.06', alert: 5, major: 1, high: 2 },
-    { date: '10.07', alert: 4, major: 1, high: 1 },
-    { date: '10.08', alert: 7, major: 2, high: 3 },
-    { date: '10.09', alert: 3, major: 0, high: 1 },
-    { date: '10.10', alert: 5, major: 1, high: 2 },
-    { date: '10.11', alert: 2, major: 0, high: 0 },
-    { date: '10.12', alert: 4, major: 1, high: 1 },
-    { date: '10.13', alert: 5, major: 2, high: 1 },
-    { date: '10.14', alert: 3, major: 0, high: 1 },
-    { date: '10.15', alert: 6, major: 2, high: 2 },
-    { date: '10.16', alert: 4, major: 1, high: 1 },
-  ];
+  const [levelFilter, setLevelFilter] = useState<AlertLevel | '全部'>('全部');
+  const [dynamicLevelFilter, setDynamicLevelFilter] = useState<AlertLevel | '全部'>('全部');
+  const levelCounts = countAlertsByLevel(LATEST_ALERTS);
+  const dynamicLevelCounts = countAlertsByLevel(DYNAMIC_LATEST_ALERTS);
+  const filteredAlerts = filterAlertsByLevel(LATEST_ALERTS, levelFilter);
+  const filteredDynamicAlerts = filterAlertsByLevel(DYNAMIC_LATEST_ALERTS, dynamicLevelFilter);
 
-  // 30-Day Dynamic Threshold Alert Trends Mock Data for Section 2 (Recent dates in Oct 2026)
-  const dynamicAlertTrendDays = [
-    { date: '10.01', alert: 2, major: 0, high: 1 },
-    { date: '10.02', alert: 5, major: 1, high: 2 },
-    { date: '10.03', alert: 3, major: 1, high: 0 },
-    { date: '10.04', alert: 4, major: 1, high: 1 },
-    { date: '10.05', alert: 7, major: 2, high: 2 },
-    { date: '10.06', alert: 4, major: 1, high: 1 },
-    { date: '10.07', alert: 3, major: 0, high: 1 },
-    { date: '10.08', alert: 6, major: 2, high: 2 },
-    { date: '10.09', alert: 2, major: 0, high: 1 },
-    { date: '10.10', alert: 4, major: 1, high: 1 },
-    { date: '10.11', alert: 3, major: 1, high: 0 },
-    { date: '10.12', alert: 5, major: 2, high: 1 },
-    { date: '10.13', alert: 4, major: 1, high: 1 },
-    { date: '10.14', alert: 2, major: 0, high: 0 },
-    { date: '10.15', alert: 5, major: 2, high: 1 },
-    { date: '10.16', alert: 3, major: 1, high: 1 },
-  ];
 
-  // Latest 10 Alerts Data for Section 1 with Recent 2026 Timestamps
-  const latest10Alerts = [
-    {
-      seq: 1,
-      checkTime: '2026-10-16 14:30:00',
-      alarmTime: '2026-10-16 14:30:05',
-      level: '重大告警',
-      title: '核心网关SDN控制器CPU利用率突增离群',
-      text: '指标值已超出上限100%',
-      actualValue: '96.5%',
-      predictedValue: '45.0%',
-      upperLimit: '80.0%',
-      lowerLimit: '10.0%',
-      resId: 'RES-SDN-001',
-      resType: 'SDN',
-      resIp: '10.240.2.20',
-    },
-    {
-      seq: 2,
-      checkTime: '2026-10-16 13:30:00',
-      alarmTime: '2026-10-16 13:30:04',
-      level: '高级告警',
-      title: '云主机App内存占用骤增离群',
-      text: '指标值已超出82%',
-      actualValue: '82.0%',
-      predictedValue: '50.0%',
-      upperLimit: '75.0%',
-      lowerLimit: '15.0%',
-      resId: 'RES-SRV-008',
-      resType: 'Server',
-      resIp: '10.240.1.15',
-    },
-    {
-      seq: 3,
-      checkTime: '2026-10-16 12:15:00',
-      alarmTime: '2026-10-16 12:15:02',
-      level: '中级告警',
-      title: '核心交换机GE0/1端口丢包率抖动',
-      text: '包丢弃率连续3个周期超基线',
-      actualValue: '12.4%',
-      predictedValue: '0.1%',
-      upperLimit: '5.0%',
-      lowerLimit: '0.0%',
-      resId: 'RES-SW-004',
-      resType: 'Switch',
-      resIp: '10.240.0.1',
-    },
-    {
-      seq: 4,
-      checkTime: '2026-10-16 11:00:00',
-      alarmTime: '2026-10-16 11:00:01',
-      level: '一般告警',
-      title: '分布式存储SAN-Storage IO延迟增加',
-      text: '指标值已超出61%',
-      actualValue: '61.0%',
-      predictedValue: '30.0%',
-      upperLimit: '55.0%',
-      lowerLimit: '5.0%',
-      resId: 'RES-STOR-002',
-      resType: 'Storage',
-      resIp: '10.240.5.12',
-    },
-    {
-      seq: 5,
-      checkTime: '2026-10-16 10:20:00',
-      alarmTime: '2026-10-16 10:20:03',
-      level: '高级告警',
-      title: 'Web前端节点HTTP 5xx状态码突增',
-      text: '错误响应数突破动态离群上限',
-      actualValue: '78.2%',
-      predictedValue: '2.0%',
-      upperLimit: '10.0%',
-      lowerLimit: '0.0%',
-      resId: 'RES-WEB-009',
-      resType: 'Server',
-      resIp: '10.240.1.99',
-    },
-    {
-      seq: 6,
-      checkTime: '2026-10-16 09:45:00',
-      alarmTime: '2026-10-16 09:45:02',
-      level: '中级告警',
-      title: '数据库写集群TCP连接数陡增',
-      text: '当前活跃连接数超置信区间',
-      actualValue: '880',
-      predictedValue: '320',
-      upperLimit: '600',
-      lowerLimit: '50',
-      resId: 'RES-DB-003',
-      resType: 'Database',
-      resIp: '10.240.3.18',
-    },
-    {
-      seq: 7,
-      checkTime: '2026-10-16 08:30:00',
-      alarmTime: '2026-10-16 08:30:01',
-      level: '一般告警',
-      title: '边界防火墙Session表利用率较高',
-      text: '利用率超出常规基线',
-      actualValue: '68.5%',
-      predictedValue: '40.0%',
-      upperLimit: '65.0%',
-      lowerLimit: '10.0%',
-      resId: 'RES-FW-001',
-      resType: 'Firewall',
-      resIp: '10.240.0.254',
-    },
-    {
-      seq: 8,
-      checkTime: '2026-10-16 07:10:00',
-      alarmTime: '2026-10-16 07:10:02',
-      level: '重大告警',
-      title: '核心路由节点BGP邻居会话断开',
-      text: '路由可达性严重偏离正常概率分布',
-      actualValue: '0 (Down)',
-      predictedValue: '1 (Up)',
-      upperLimit: '1',
-      lowerLimit: '1',
-      resId: 'RES-RT-002',
-      resType: 'Router',
-      resIp: '10.240.0.2',
-    },
-    {
-      seq: 9,
-      checkTime: '2026-10-16 06:00:00',
-      alarmTime: '2026-10-16 06:00:01',
-      level: '一般告警',
-      title: '大数据计算节点Disk I/O Wait率上升',
-      text: '等待时间突破边缘阈值',
-      actualValue: '42.1%',
-      predictedValue: '12.0%',
-      upperLimit: '35.0%',
-      lowerLimit: '0.0%',
-      resId: 'RES-HADOOP-05',
-      resType: 'Server',
-      resIp: '10.240.8.55',
-    },
-    {
-      seq: 10,
-      checkTime: '2026-10-16 04:15:00',
-      alarmTime: '2026-10-16 04:15:04',
-      level: '中级告警',
-      title: '容器Pod网络吞吐流量异常掉落',
-      text: '包吞吐速率偏离正常周期型曲线',
-      actualValue: '12 MB/s',
-      predictedValue: '120 MB/s',
-      upperLimit: '200 MB/s',
-      lowerLimit: '80 MB/s',
-      resId: 'RES-K8S-POD12',
-      resType: 'Container',
-      resIp: '10.244.3.44',
-    },
-  ];
 
-  // Dynamic Threshold Latest 10 Alerts Data
-  const dynamicLatest10Alerts = [
-    {
-      seq: 1,
-      checkTime: '2026-10-16 14:25:00',
-      alarmTime: '2026-10-16 14:25:03',
-      level: '重大告警',
-      title: 'SDN节点CPU动态阈值超越100%',
-      text: '指标值已超出100%',
-      actualValue: '95.2%',
-      predictedValue: '40.0%',
-      upperLimit: '78.0%',
-      lowerLimit: '10.0%',
-      resId: 'RES-SDN-002',
-      resType: 'SDN',
-      resIp: '10.240.2.22',
-    },
-    {
-      seq: 2,
-      checkTime: '2026-10-16 13:10:00',
-      alarmTime: '2026-10-16 13:10:02',
-      level: '高级告警',
-      title: '应用服务器内存动态基线偏移',
-      text: '指标值已超出82%',
-      actualValue: '82.0%',
-      predictedValue: '48.0%',
-      upperLimit: '72.0%',
-      lowerLimit: '12.0%',
-      resId: 'RES-SRV-005',
-      resType: 'Server',
-      resIp: '10.240.1.18',
-    },
-    {
-      seq: 3,
-      checkTime: '2026-10-16 12:00:00',
-      alarmTime: '2026-10-16 12:00:01',
-      level: '中级告警',
-      title: '核心交换机接口包丢弃率超越边界',
-      text: '指标值已超出61%',
-      actualValue: '61.0%',
-      predictedValue: '25.0%',
-      upperLimit: '50.0%',
-      lowerLimit: '5.0%',
-      resId: 'RES-SW-008',
-      resType: 'Switch',
-      resIp: '10.240.0.8',
-    },
-    {
-      seq: 4,
-      checkTime: '2026-10-16 10:45:00',
-      alarmTime: '2026-10-16 10:45:02',
-      level: '一般告警',
-      title: '存储集群写入IO延迟超出动态包络',
-      text: '指标低于动态下限',
-      actualValue: '15.0%',
-      predictedValue: '45.0%',
-      upperLimit: '85.0%',
-      lowerLimit: '20.0%',
-      resId: 'RES-STOR-005',
-      resType: 'Storage',
-      resIp: '10.240.5.15',
-    },
-    {
-      seq: 5,
-      checkTime: '2026-10-16 09:30:00',
-      alarmTime: '2026-10-16 09:30:03',
-      level: '高级告警',
-      title: '网关QoS策略流速抖动超过动态边界',
-      text: '流量峰值突破3卡方显著区',
-      actualValue: '84.5%',
-      predictedValue: '35.0%',
-      upperLimit: '70.0%',
-      lowerLimit: '10.0%',
-      resId: 'RES-GW-003',
-      resType: 'Gateway',
-      resIp: '10.240.0.3',
-    },
-  ];
+
 
   return (
     <div className="space-y-8 animate-fadeIn pb-12">
@@ -367,7 +116,7 @@ export const AnomalyHallView: React.FC = () => {
 
             <div className="lg:col-span-10 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-4 text-xs">
-                <span className="text-sky-400 font-bold">近30日每日告警统计</span>
+                <span className="text-sky-400 font-bold">近30日每日告警统计 <span className="text-slate-500 font-normal">· 16日合计 {sumTrendAlerts(ALERT_TREND_DAYS)} 条</span></span>
                 <div className="flex items-center gap-4 text-slate-400 text-[11px]">
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> 重大告警</span>
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> 高级告警</span>
@@ -388,7 +137,7 @@ export const AnomalyHallView: React.FC = () => {
                   </defs>
                 </svg>
 
-                {alertTrendDays.map((item, idx) => (
+                {ALERT_TREND_DAYS.map((item, idx) => (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-1 group z-10">
                     <div className="relative w-full flex flex-col justify-end items-center h-28">
                       <div
@@ -551,6 +300,44 @@ export const AnomalyHallView: React.FC = () => {
             <div className="lg:col-span-4 bg-slate-950/80 border border-slate-800/80 rounded-2xl p-4 space-y-3 flex flex-col justify-between">
               <div className="space-y-3">
                 <h4 className="text-xs font-bold text-white">最新告警Top10</h4>
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  {(['全部', ...ALERT_LEVELS] as const).map((level) => {
+                    const count = level === '全部' ? DYNAMIC_LATEST_ALERTS.length : dynamicLevelCounts[level];
+                    const active = dynamicLevelFilter === level;
+                    return (
+                      <button
+                        key={level}
+                        onClick={() => setDynamicLevelFilter(level)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors ${
+                          active
+                            ? 'bg-cyan-500/20 border-cyan-500/60 text-cyan-300'
+                            : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
+                        }`}
+                      >
+                        {level} {count}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  {(['全部', ...ALERT_LEVELS] as const).map((level) => {
+                    const count = level === '全部' ? LATEST_ALERTS.length : levelCounts[level];
+                    const active = levelFilter === level;
+                    return (
+                      <button
+                        key={level}
+                        onClick={() => setLevelFilter(level)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors ${
+                          active
+                            ? 'bg-cyan-500/20 border-cyan-500/60 text-cyan-300'
+                            : 'bg-slate-900 border-slate-700 text-slate-400 hover:border-slate-500'
+                        }`}
+                      >
+                        {level} {count}
+                      </button>
+                    );
+                  })}
+                </div>
 
                 <div className="overflow-x-auto max-h-52 overflow-y-auto">
                   <table className="w-full text-left text-xs border-collapse">
@@ -571,7 +358,7 @@ export const AnomalyHallView: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
-                      {latest10Alerts.map((row) => (
+                      {filteredAlerts.map((row) => (
                         <tr key={row.seq} className="hover:bg-slate-900/60 transition-colors">
                           <td className="py-2 px-2 text-slate-400">{row.seq}</td>
                           <td className="py-2 px-2 text-slate-300 whitespace-nowrap">{row.checkTime}</td>
@@ -601,6 +388,11 @@ export const AnomalyHallView: React.FC = () => {
                           <td className="py-2 px-2 text-sky-400">{row.resIp}</td>
                         </tr>
                       ))}
+                      {filteredAlerts.length === 0 && (
+                        <tr>
+                          <td colSpan={12} className="py-4 px-2 text-center text-slate-500 font-sans">该告警级别暂无记录</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -681,7 +473,7 @@ export const AnomalyHallView: React.FC = () => {
 
             <div className="lg:col-span-10 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-4 text-xs">
-                <span className="text-sky-400 font-bold">近30日每日动态阈值告警统计</span>
+                <span className="text-sky-400 font-bold">近30日每日动态阈值告警统计 <span className="text-slate-500 font-normal">· 16日合计 {sumTrendAlerts(DYNAMIC_ALERT_TREND_DAYS)} 条</span></span>
                 <div className="flex items-center gap-4 text-slate-400 text-[11px]">
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> 重大告警</span>
                   <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> 高级告警</span>
@@ -702,7 +494,7 @@ export const AnomalyHallView: React.FC = () => {
                   </defs>
                 </svg>
 
-                {dynamicAlertTrendDays.map((item, idx) => (
+                {DYNAMIC_ALERT_TREND_DAYS.map((item, idx) => (
                   <div key={idx} className="flex-1 flex flex-col items-center gap-1 group z-10">
                     <div className="relative w-full flex flex-col justify-end items-center h-28">
                       <div
@@ -889,7 +681,7 @@ export const AnomalyHallView: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
-                      {dynamicLatest10Alerts.map((row) => (
+                      {filteredDynamicAlerts.map((row) => (
                         <tr key={row.seq} className="hover:bg-slate-900/60 transition-colors">
                           <td className="py-2 px-2 text-slate-400">{row.seq}</td>
                           <td className="py-2 px-2 text-slate-300 whitespace-nowrap">{row.checkTime}</td>
@@ -919,6 +711,11 @@ export const AnomalyHallView: React.FC = () => {
                           <td className="py-2 px-2 text-sky-400">{row.resIp}</td>
                         </tr>
                       ))}
+                      {filteredDynamicAlerts.length === 0 && (
+                        <tr>
+                          <td colSpan={12} className="py-4 px-2 text-center text-slate-500 font-sans">该告警级别暂无记录</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

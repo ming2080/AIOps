@@ -82,3 +82,28 @@ export interface AlgorithmFamily {
   accuracy: string;
   icon: string;
 }
+
+export type AlertLevel = '重大告警' | '高级告警' | '中级告警' | '一般告警';
+
+export interface AnomalyAlert {
+  seq: number;
+  checkTime: string;
+  alarmTime: string;
+  level: AlertLevel;
+  title: string;
+  text: string;
+  actualValue: string;
+  predictedValue: string;
+  upperLimit: string;
+  lowerLimit: string;
+  resId: string;
+  resType: string;
+  resIp: string;
+}
+
+export interface AnomalyTrendDay {
+  date: string;
+  alert: number;
+  major: number;
+  high: number;
+}
