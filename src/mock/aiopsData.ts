@@ -216,14 +216,12 @@ export const CAPABILITY_NODES: CapabilityNode[] = [
 ];
 
 export const MODEL_CATEGORY_DISTRIBUTION: ModelCategoryItem[] = [
-  { name: '单指标异常检测', count: 358, percentage: 32.5, color: '#3B82F6' },
-  { name: '性能优化', count: 258, percentage: 22.5, color: '#10B981' },
-  { name: '多指标异常检测', count: 158, percentage: 22.5, color: '#8B5CF6' },
-  { name: '动态阈值', count: 58, percentage: 12.5, color: '#F59E0B' },
-  { name: '智能预测', count: 128, percentage: 12.5, color: '#06B6D4' },
+  { name: '单指标异常检测', count: 358, color: '#3B82F6' },
+  { name: '性能优化', count: 258, color: '#10B981' },
+  { name: '多指标异常检测', count: 158, color: '#8B5CF6' },
+  { name: '动态阈值', count: 58, color: '#F59E0B' },
+  { name: '智能预测', count: 128, color: '#06B6D4' },
 ];
-
-export const TOTAL_ENABLED_MODELS = 156881;
 
 export const MONITORED_RESOURCES: ResourceMonitorCard[] = [
   {

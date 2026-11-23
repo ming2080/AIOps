@@ -5,13 +5,17 @@ import { PieChart as PieIcon } from 'lucide-react';
 
 interface ModelDistributionDonutProps {
   categories: ModelCategoryItem[];
-  totalModels: number;
 }
 
 export const ModelDistributionDonut: React.FC<ModelDistributionDonutProps> = ({
   categories,
-  totalModels,
 }) => {
+  // 总数与占比全部由分类数量推导，避免手写总数/占比与数量对不上
+  const totalModels = categories.reduce((sum, cat) => sum + cat.count, 0);
+  const categoriesWithShare = categories.map((cat) => ({
+    ...cat,
+    percentage: totalModels > 0 ? (cat.count / totalModels) * 100 : 0,
+  }));
   return (
     <div className="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 lg:p-5 backdrop-blur-md flex flex-col justify-between h-full">
       {/* Header */}
@@ -28,7 +32,7 @@ export const ModelDistributionDonut: React.FC<ModelDistributionDonutProps> = ({
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={categories}
+              data={categoriesWithShare}
               cx="50%"
               cy="50%"
               innerRadius={55}
@@ -37,7 +41,7 @@ export const ModelDistributionDonut: React.FC<ModelDistributionDonutProps> = ({
               dataKey="count"
               nameKey="name"
             >
-              {categories.map((entry, index) => (
+              {categoriesWithShare.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} stroke="#0F172A" strokeWidth={2} />
               ))}
             </Pie>
@@ -55,7 +59,7 @@ export const ModelDistributionDonut: React.FC<ModelDistributionDonutProps> = ({
                         数量: <span className="font-bold text-cyan-400">{data.count.toLocaleString()}</span>
                       </div>
                       <div className="text-slate-400 font-mono">
-                        占比: <span className="font-bold text-white">{data.percentage}%</span>
+                        占比: <span className="font-bold text-white">{(data.percentage ?? 0).toFixed(1)}%</span>
                       </div>
                     </div>
                   );
@@ -77,13 +81,13 @@ export const ModelDistributionDonut: React.FC<ModelDistributionDonutProps> = ({
 
       {/* Legend Grid */}
       <div className="grid grid-cols-2 gap-2 border-t border-slate-800/80 pt-3 text-xs">
-        {categories.map((cat, idx) => (
+        {categoriesWithShare.map((cat, idx) => (
           <div key={idx} className="flex items-center justify-between gap-1 p-1.5 rounded-lg bg-slate-950/40">
             <div className="flex items-center gap-1.5 truncate">
               <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cat.color }} />
               <span className="text-slate-300 truncate">{cat.name}</span>
             </div>
-            <span className="font-mono text-slate-400 font-bold shrink-0">{cat.percentage}%</span>
+            <span className="font-mono text-slate-400 font-bold shrink-0">{cat.percentage.toFixed(1)}%</span>
           </div>
         ))}
       </div>

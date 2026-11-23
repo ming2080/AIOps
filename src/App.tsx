@@ -33,7 +33,6 @@ import {
   INITIAL_KPIS,
   CAPABILITY_NODES,
   MODEL_CATEGORY_DISTRIBUTION,
-  TOTAL_ENABLED_MODELS,
   MONITORED_RESOURCES,
   ALGORITHM_FAMILIES,
   INITIAL_NOTIFICATIONS,
@@ -177,7 +176,6 @@ export default function App() {
               <div className="lg:col-span-4 space-y-6 flex flex-col justify-between">
                 <ModelDistributionDonut
                   categories={MODEL_CATEGORY_DISTRIBUTION}
-                  totalModels={TOTAL_ENABLED_MODELS}
                 />
                 <MonitoredResourcesGrid resources={MONITORED_RESOURCES} />
               </div>

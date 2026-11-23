@@ -25,7 +25,8 @@ export interface KPIItem {
 export interface ModelCategoryItem {
   name: string;
   count: number;
-  percentage: number;
+  /** 占比由数量推导，调用方按 count / 总数计算，不再手写 */
+  percentage?: number;
   color: string;
 }
 
