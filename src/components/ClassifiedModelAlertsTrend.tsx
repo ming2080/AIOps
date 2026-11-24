@@ -18,6 +18,19 @@ interface ClassifiedModelAlertsTrendProps {
 export const ClassifiedModelAlertsTrend: React.FC<ClassifiedModelAlertsTrendProps> = ({
   data,
 }) => {
+  // 底部统计由传入数据推导：峰值日为两类告警合计最高的一天，另汇总 7 日告警总数
+  const peak = data.reduce(
+    (best, point) => {
+      const total = point.anomalyAlerts + point.regressionAlerts;
+      return total > best.total ? { date: point.date, total } : best;
+    },
+    { date: '—', total: 0 }
+  );
+  const totalAlerts = data.reduce(
+    (sum, point) => sum + point.anomalyAlerts + point.regressionAlerts,
+    0
+  );
+
   return (
     <div className="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 lg:p-5 backdrop-blur-md flex flex-col justify-between h-full min-h-[340px]">
       <div>
@@ -98,8 +111,8 @@ export const ClassifiedModelAlertsTrend: React.FC<ClassifiedModelAlertsTrendProp
       </div>
 
       <div className="border-t border-slate-800/80 pt-2 flex items-center justify-between text-[11px] text-slate-400">
-        <span>峰值告警日: 4.5 (8次)</span>
-        <span className="font-mono text-emerald-400">告警收敛率: 95.68%</span>
+        <span>峰值告警日: {peak.date} ({peak.total}次)</span>
+        <span className="font-mono text-emerald-400">7 日告警总数: {totalAlerts} 次</span>
       </div>
     </div>
   );

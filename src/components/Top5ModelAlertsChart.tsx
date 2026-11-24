@@ -24,16 +24,21 @@ export const Top5ModelAlertsChart: React.FC<Top5ModelAlertsChartProps> = ({ aler
     'CPU利用率'
   );
 
-  const filtered = alerts.map((item) => ({
-    ...item,
-    // Add realistic dynamic variation depending on metric
-    alertCount:
-      selectedMetric === 'CPU利用率'
-        ? item.alertCount
-        : selectedMetric === '内存利用率'
-        ? Math.round(item.alertCount * 0.85)
-        : Math.round(item.alertCount * 0.65),
-  }));
+  // 按所选分类筛选，再按所选指标折算告警数，按告警数降序取前 5 条
+  const filtered = alerts
+    .filter((item) => item.category === selectedCategory)
+    .map((item) => ({
+      ...item,
+      // Add realistic dynamic variation depending on metric
+      alertCount:
+        selectedMetric === 'CPU利用率'
+          ? item.alertCount
+          : selectedMetric === '内存利用率'
+          ? Math.round(item.alertCount * 0.85)
+          : Math.round(item.alertCount * 0.65),
+    }))
+    .sort((a, b) => b.alertCount - a.alertCount)
+    .slice(0, 5);
 
   return (
     <div className="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 lg:p-5 backdrop-blur-md flex flex-col justify-between h-full min-h-[340px]">
@@ -127,7 +132,7 @@ export const Top5ModelAlertsChart: React.FC<Top5ModelAlertsChartProps> = ({ aler
 
       <div className="border-t border-slate-800/80 pt-2 flex items-center justify-between text-[11px] text-slate-400">
         <span>数据维度: 7 天累计告警</span>
-        <span className="font-mono text-cyan-400">Top1 告警量: {filtered[0]?.alertCount || 920} 次</span>
+        <span className="font-mono text-cyan-400">Top1 告警量: {filtered[0] ? `${filtered[0].alertCount} 次` : '—'}</span>
       </div>
     </div>
   );

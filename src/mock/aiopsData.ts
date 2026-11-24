@@ -408,6 +408,9 @@ export const TOP5_MODEL_ALERTS: Top5AlertItem[] = [
   { id: 'ID3', name: '消息队列-03', alertCount: 650, metric: 'CPU利用率', category: '单指标异常检测' },
   { id: 'ID4', name: '核心交换机-04', alertCount: 510, metric: 'CPU利用率', category: '动态阈值' },
   { id: 'ID5', name: 'K8s Pod-05', alertCount: 420, metric: 'CPU利用率', category: '动态阈值' },
+  { id: 'ID6', name: '应用服务器-06', alertCount: 380, metric: 'CPU利用率', category: '动态阈值' },
+  { id: 'ID7', name: '边缘计算节点-07', alertCount: 340, metric: 'CPU利用率', category: '单指标异常检测' },
+  { id: 'ID8', name: '存储阵列-08', alertCount: 290, metric: 'CPU利用率', category: '动态阈值' },
 ];
 
 export const CLASSIFIED_TREND_DATA: ClassifiedTrendPoint[] = [
