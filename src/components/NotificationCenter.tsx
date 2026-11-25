@@ -14,6 +14,12 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterLevel, setFilterLevel] = useState<string>('ALL');
 
+  const statusCounts = {
+    pending: notifications.filter((item) => item.status === 'pending').length,
+    diagnosing: notifications.filter((item) => item.status === 'diagnosing').length,
+    resolved: notifications.filter((item) => item.status === 'resolved').length,
+  };
+
   const filtered = notifications.filter((item) => {
     const matchesSearch =
       item.deviceCode.includes(searchTerm) ||
@@ -165,7 +171,9 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       {/* Footer stats */}
       <div className="border-t border-slate-800/80 pt-2.5 mt-2 flex items-center justify-between text-[11px] text-slate-400">
         <span>已显示 {filtered.length} 条记录</span>
-        <span className="font-mono text-cyan-400">24h 告警消除率: 98.2%</span>
+        <span className="font-mono">
+          待处理 <strong className="text-amber-400">{statusCounts.pending}</strong> · 诊断中 <strong className="text-cyan-400">{statusCounts.diagnosing}</strong> · 已收敛 <strong className="text-emerald-400">{statusCounts.resolved}</strong>
+        </span>
       </div>
     </div>
   );

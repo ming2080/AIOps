@@ -7,6 +7,8 @@ interface MonitoredResourcesGridProps {
 }
 
 export const MonitoredResourcesGrid: React.FC<MonitoredResourcesGridProps> = ({ resources }) => {
+  const totalModelCount = resources.reduce((sum, res) => sum + res.modelCount, 0);
+  const totalManagedDevices = resources.reduce((sum, res) => sum + res.managedDevicesCount, 0);
   const getResourceIcon = (type: string) => {
     switch (type) {
       case 'host':
@@ -29,7 +31,7 @@ export const MonitoredResourcesGrid: React.FC<MonitoredResourcesGridProps> = ({ 
           <Server className="w-4 h-4 text-cyan-400" />
           模型监控资源
         </h3>
-        <span className="text-[11px] text-slate-400 font-mono">4 核心分类</span>
+        <span className="text-[11px] text-slate-400 font-mono">{resources.length} 核心分类</span>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -67,6 +69,11 @@ export const MonitoredResourcesGrid: React.FC<MonitoredResourcesGridProps> = ({ 
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="border-t border-slate-800/80 pt-2.5 mt-4 flex items-center justify-between text-[11px] text-slate-400">
+        <span>模型总数 <strong className="text-indigo-400 font-mono">{totalModelCount.toLocaleString()}</strong></span>
+        <span>纳管设备总数 <strong className="text-emerald-400 font-mono">{totalManagedDevices.toLocaleString()}</strong></span>
       </div>
     </div>
   );

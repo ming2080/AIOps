@@ -89,6 +89,25 @@ const MULTI_METRIC_DATASET: MetricAnomalyItem[] = [
 
 import { ModelBoardView } from './ModelBoardView';
 
+// 三类数据集的并集：筛选维度选项全部由此推导，不再手写
+const ALL_METRIC_ITEMS: MetricAnomalyItem[] = [
+  ...SINGLE_METRIC_DATASET,
+  ...DYNAMIC_THRESHOLD_DATASET,
+  ...MULTI_METRIC_DATASET,
+];
+const uniqueOptions = (pick: (item: MetricAnomalyItem) => string): string[] =>
+  Array.from(new Set(ALL_METRIC_ITEMS.map(pick)));
+const REGION_CATEGORY_OPTIONS = uniqueOptions((item) => item.regionCategory);
+const REGION_CENTER_OPTIONS = uniqueOptions((item) => item.regionCenter);
+const RESOURCE_POOL_OPTIONS = uniqueOptions((item) => item.resourcePool);
+const POD_OPTIONS = uniqueOptions((item) => item.pod);
+const VENDOR_OPTIONS = uniqueOptions((item) => item.vendor);
+const MODEL_TYPE_COUNTS = {
+  single: SINGLE_METRIC_DATASET.length,
+  dynamic: DYNAMIC_THRESHOLD_DATASET.length,
+  multi: MULTI_METRIC_DATASET.length,
+} as const;
+
 interface MetricAnomalyViewProps {
   onOpenModelBoard?: () => void;
 }
@@ -223,7 +242,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              单指标异常检测模型
+              单指标异常检测模型（{MODEL_TYPE_COUNTS.single}）
             </button>
             <button
               onClick={() => handleModelTabSwitch('dynamic')}
@@ -233,7 +252,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              动态阈值模型
+              动态阈值模型（{MODEL_TYPE_COUNTS.dynamic}）
             </button>
             <button
               onClick={() => handleModelTabSwitch('multi')}
@@ -243,7 +262,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              多指标异常检测模型
+              多指标异常检测模型（{MODEL_TYPE_COUNTS.multi}）
             </button>
           </div>
 
@@ -262,7 +281,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
               <div className="flex items-center gap-4">
                 <span className="text-slate-400 shrink-0 w-24 text-right">区域分类:</span>
                 <div className="flex flex-wrap items-center gap-2">
-                  {['ALL', '一级资源池', '省级IT云', '池外'].map((item) => (
+                  {['ALL', ...REGION_CATEGORY_OPTIONS].map((item) => (
                     <button
                       key={item}
                       onClick={() => setSelectedRegionCategory(item)}
@@ -282,7 +301,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
               <div className="flex items-center gap-4">
                 <span className="text-slate-400 shrink-0 w-24 text-right">区域中心:</span>
                 <div className="flex flex-wrap items-center gap-2">
-                  {['ALL', '东北', '华北', '华北一', '华北二', '华中', '华东一', '华南一'].map((item) => (
+                  {['ALL', ...REGION_CENTER_OPTIONS].map((item) => (
                     <button
                       key={item}
                       onClick={() => setSelectedRegionCenter(item)}
@@ -302,7 +321,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
               <div className="flex items-center gap-4">
                 <span className="text-slate-400 shrink-0 w-24 text-right">资源池:</span>
                 <div className="flex flex-wrap items-center gap-2">
-                  {['ALL', '东莞资源池', '安徽资源池', '北京资源池', '重庆资源池', '广东资源池', '呼池', '甘肃资源池'].map((item) => (
+                  {['ALL', ...RESOURCE_POOL_OPTIONS].map((item) => (
                     <button
                       key={item}
                       onClick={() => setSelectedResourcePool(item)}
@@ -322,7 +341,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
               <div className="flex items-center gap-4">
                 <span className="text-slate-400 shrink-0 w-24 text-right">POD:</span>
                 <div className="flex flex-wrap items-center gap-2">
-                  {['ALL', '东莞-ironic资源池', '东莞-kvm资源池', '东莞-vmware', '东莞-二期-ironic-POD1资源池', '二期一阶段POD7', '呼池-虚拟015'].map((item) => (
+                  {['ALL', ...POD_OPTIONS].map((item) => (
                     <button
                       key={item}
                       onClick={() => setSelectedPod(item)}
@@ -342,7 +361,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
               <div className="flex items-center gap-4">
                 <span className="text-slate-400 shrink-0 w-24 text-right">设备厂家:</span>
                 <div className="flex flex-wrap items-center gap-2">
-                  {['ALL', '3COM', 'A10', 'BEA', 'BMC', 'HUAWEI', 'DELL'].map((item) => (
+                  {['ALL', ...VENDOR_OPTIONS].map((item) => (
                     <button
                       key={item}
                       onClick={() => setSelectedVendor(item)}
@@ -427,7 +446,7 @@ export const MetricAnomalyView: React.FC<MetricAnomalyViewProps> = ({ onOpenMode
           <div className="bg-slate-950 rounded-2xl border border-slate-800/80 overflow-hidden shadow-xl space-y-2">
             <div className="p-3 bg-slate-900/60 border-b border-slate-800 flex items-center justify-between text-xs">
               <span className="text-slate-300 font-medium">
-                查询结果列表 (<strong className="text-cyan-400 font-mono">{filteredDisplayItems.length}</strong> 条)
+                查询结果列表（当前分类共 <strong className="text-slate-100 font-mono">{activeDataset.length}</strong> 条，筛选后 <strong className="text-cyan-400 font-mono">{filteredDisplayItems.length}</strong> 条）
               </span>
               <span className="text-slate-500 text-[11px]">
                 实时离群计算引擎: {modelTypeTab === 'single' ? 'Prophet 单指标时序分解' : modelTypeTab === 'dynamic' ? '3Sigma 动态包络预测' : 'IsolationForest 多维联合特征'}
