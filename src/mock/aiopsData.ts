@@ -400,6 +400,10 @@ export const TREND_PREDICTIONS: TrendPredictionItem[] = [
   { id: 8, deviceName: '设备8', ip: '226.15.10.38', riskPercent: 70, category: '路由器', predictionType: 'performance' },
   { id: 9, deviceName: '设备9', ip: '226.15.10.39', riskPercent: 60, category: '防火墙', predictionType: 'performance' },
   { id: 10, deviceName: '设备10', ip: '226.15.10.40', riskPercent: 50, category: '负载均衡', predictionType: 'performance' },
+  { id: 11, deviceName: '设备11', ip: '226.15.10.41', riskPercent: 85, category: '路由器', predictionType: 'fault' },
+  { id: 12, deviceName: '设备12', ip: '226.15.10.42', riskPercent: 45, category: '防火墙', predictionType: 'fault' },
+  { id: 13, deviceName: '设备13', ip: '226.15.10.43', riskPercent: 75, category: 'SDN', predictionType: 'capacity' },
+  { id: 14, deviceName: '设备14', ip: '226.15.10.44', riskPercent: 55, category: '负载均衡', predictionType: 'performance' },
 ];
 
 export const TOP5_MODEL_ALERTS: Top5AlertItem[] = [

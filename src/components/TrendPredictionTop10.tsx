@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { TrendPredictionItem } from '../types/aiops';
 import { TrendingUp, ShieldAlert, Cpu, Filter, ChevronRight } from 'lucide-react';
 
@@ -14,13 +14,32 @@ export const TrendPredictionTop10: React.FC<TrendPredictionTop10Props> = ({
   const [activeType, setActiveType] = useState<'fault' | 'capacity' | 'performance'>('fault');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
-  const categories = ['ALL', '交换机', '路由器', '防火墙', '负载均衡', 'SDN'];
+  // 当前预测类型下的全部预测：分类 pills 与条数由数据推导
+  const typePredictions = useMemo(
+    () => predictions.filter((item) => item.predictionType === activeType),
+    [predictions, activeType],
+  );
 
-  const filtered = predictions.filter((item) => {
-    const matchesType = item.predictionType === activeType;
-    const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
-    return matchesType && matchesCategory;
-  });
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>();
+    typePredictions.forEach((item) => {
+      counts.set(item.category, (counts.get(item.category) ?? 0) + 1);
+    });
+    return [{ name: 'ALL', count: typePredictions.length }, ...[...counts.entries()].map(([name, count]) => ({ name, count }))];
+  }, [typePredictions]);
+
+  const handleTypeChange = (type: 'fault' | 'capacity' | 'performance') => {
+    setActiveType(type);
+    setSelectedCategory('ALL');
+  };
+
+  // 按风险值降序取前 10 条，标题 Top10 名副其实
+  const filtered = useMemo(() => {
+    const matched = typePredictions.filter(
+      (item) => selectedCategory === 'ALL' || item.category === selectedCategory,
+    );
+    return [...matched].sort((a, b) => b.riskPercent - a.riskPercent).slice(0, 10);
+  }, [typePredictions, selectedCategory]);
 
   return (
     <div className="bg-slate-900/60 border border-slate-800/90 rounded-2xl p-4 lg:p-5 backdrop-blur-md flex flex-col justify-between h-full min-h-[380px]">
@@ -35,7 +54,7 @@ export const TrendPredictionTop10: React.FC<TrendPredictionTop10Props> = ({
           {/* Type Sub-Tabs */}
           <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-lg">
             <button
-              onClick={() => setActiveType('fault')}
+              onClick={() => handleTypeChange('fault')}
               className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
                 activeType === 'fault'
                   ? 'bg-cyan-600 text-white shadow-sm'
@@ -45,7 +64,7 @@ export const TrendPredictionTop10: React.FC<TrendPredictionTop10Props> = ({
               网络故障预测
             </button>
             <button
-              onClick={() => setActiveType('capacity')}
+              onClick={() => handleTypeChange('capacity')}
               className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
                 activeType === 'capacity'
                   ? 'bg-cyan-600 text-white shadow-sm'
@@ -55,7 +74,7 @@ export const TrendPredictionTop10: React.FC<TrendPredictionTop10Props> = ({
               网络容量预测
             </button>
             <button
-              onClick={() => setActiveType('performance')}
+              onClick={() => handleTypeChange('performance')}
               className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
                 activeType === 'performance'
                   ? 'bg-cyan-600 text-white shadow-sm'
@@ -75,21 +94,24 @@ export const TrendPredictionTop10: React.FC<TrendPredictionTop10Props> = ({
           </span>
           {categories.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              key={cat.name}
+              onClick={() => setSelectedCategory(cat.name)}
               className={`px-2.5 py-0.5 text-xs font-medium rounded-md transition-colors shrink-0 ${
-                selectedCategory === cat
+                selectedCategory === cat.name
                   ? 'bg-cyan-950 text-cyan-300 border border-cyan-700/60'
                   : 'bg-slate-950/60 text-slate-400 hover:text-slate-200 border border-slate-800'
               }`}
             >
-              {cat === 'ALL' ? '全部分类' : cat}
+              {cat.name === 'ALL' ? '全部分类' : cat.name} ({cat.count})
             </button>
           ))}
         </div>
 
         {/* Prediction Risk List */}
         <div className="space-y-1.5 max-h-[250px] overflow-y-auto">
+          {filtered.length === 0 && (
+            <div className="text-xs text-slate-500 text-center py-8">该分类下暂无预测数据</div>
+          )}
           {filtered.map((item, idx) => (
             <div
               key={item.id}
@@ -148,6 +170,9 @@ export const TrendPredictionTop10: React.FC<TrendPredictionTop10Props> = ({
       {/* Footer */}
       <div className="border-t border-slate-800/80 pt-2.5 mt-2 flex items-center justify-between text-[11px] text-slate-400">
         <span>基于 Transformer-TS 时序算法</span>
+        <span>
+          共 {typePredictions.length} 条 · 展示风险最高的 {filtered.length} 条
+        </span>
         <span className="text-cyan-400">提前 4 小时深度预警</span>
       </div>
     </div>

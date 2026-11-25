@@ -444,6 +444,18 @@ export const ModelBoardView: React.FC<ModelBoardViewProps> = ({
 
   const totalPages = Math.max(1, Math.ceil(filteredModels.length / pageSize));
 
+  // 模型类型与问题场景统计由模型数据推导，替代手写数字
+  const modelTypeCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    INITIAL_MODELS.forEach((m) => {
+      counts.set(m.type, (counts.get(m.type) ?? 0) + 1);
+    });
+    return counts;
+  }, []);
+  const getTypeCount = (type: string) => modelTypeCounts.get(type) ?? 0;
+  const anomalyDetectionCount = getTypeCount('单指标异常检测') + getTypeCount('多指标异常检测');
+  const disabledModelCount = useMemo(() => INITIAL_MODELS.filter((m) => m.isDisabled).length, []);
+
   // Current page models
   const paginatedModels = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -568,7 +580,7 @@ export const ModelBoardView: React.FC<ModelBoardViewProps> = ({
                   <Search className="w-4 h-4 text-cyan-400 shrink-0" />
                   <div className="flex-1">
                     <div className="text-[11px] text-slate-300">异常检测</div>
-                    <div className="font-bold font-mono text-white text-xs">15项</div>
+                    <div className="font-bold font-mono text-white text-xs">{anomalyDetectionCount}项</div>
                   </div>
                 </div>
 
@@ -576,7 +588,7 @@ export const ModelBoardView: React.FC<ModelBoardViewProps> = ({
                   <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
                   <div className="flex-1">
                     <div className="text-[11px] text-slate-300">动态阈值</div>
-                    <div className="font-bold font-mono text-white text-xs">8项</div>
+                    <div className="font-bold font-mono text-white text-xs">{getTypeCount('动态阈值')}项</div>
                   </div>
                 </div>
 
@@ -584,7 +596,7 @@ export const ModelBoardView: React.FC<ModelBoardViewProps> = ({
                   <TrendingUp className="w-4 h-4 text-cyan-400 shrink-0" />
                   <div className="flex-1">
                     <div className="text-[11px] text-slate-300">回归/预测</div>
-                    <div className="font-bold font-mono text-white text-xs">7项</div>
+                    <div className="font-bold font-mono text-white text-xs">{getTypeCount('回归预测')}项</div>
                   </div>
                 </div>
               </div>
@@ -608,7 +620,7 @@ export const ModelBoardView: React.FC<ModelBoardViewProps> = ({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">已禁用</span>
-                  <span className="text-slate-200 font-bold font-mono text-xs underline cursor-pointer">1</span>
+                  <span className="text-slate-200 font-bold font-mono text-xs underline cursor-pointer">{disabledModelCount}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">待发布</span>
@@ -640,11 +652,11 @@ export const ModelBoardView: React.FC<ModelBoardViewProps> = ({
                   }}
                   className="bg-slate-900 border border-slate-800 text-slate-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-cyan-500"
                 >
-                  <option value="全部类型">全部类型 (30项)</option>
-                  <option value="单指标异常检测">单指标异常检测 (10项)</option>
-                  <option value="动态阈值">动态阈值 (8项)</option>
-                  <option value="回归预测">回归预测 (7项)</option>
-                  <option value="多指标异常检测">多指标异常检测 (5项)</option>
+                  <option value="全部类型">全部类型 ({INITIAL_MODELS.length}项)</option>
+                  <option value="单指标异常检测">单指标异常检测 ({getTypeCount('单指标异常检测')}项)</option>
+                  <option value="动态阈值">动态阈值 ({getTypeCount('动态阈值')}项)</option>
+                  <option value="回归预测">回归预测 ({getTypeCount('回归预测')}项)</option>
+                  <option value="多指标异常检测">多指标异常检测 ({getTypeCount('多指标异常检测')}项)</option>
                 </select>
               </div>
             </div>
