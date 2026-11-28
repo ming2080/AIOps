@@ -25,6 +25,13 @@ export const CapabilityFlowMap: React.FC<CapabilityFlowMapProps> = ({
   nodes,
   onSelectNode,
 }) => {
+  // 状态图例数量由能力节点数据推导，替代手写数字
+  const statusCounts = {
+    built: nodes.filter((n) => n.status === 'built').length,
+    building: nodes.filter((n) => n.status === 'building').length,
+    planned: nodes.filter((n) => n.status === 'planned').length,
+  };
+
   const getNode = (id: string) => nodes.find((n) => n.id === id);
 
   const getStatusBadge = (status: 'built' | 'building' | 'planned') => {
@@ -122,13 +129,13 @@ export const CapabilityFlowMap: React.FC<CapabilityFlowMapProps> = ({
         {/* Status Legend */}
         <div className="flex items-center gap-3 text-xs text-slate-400 bg-slate-950/60 border border-slate-800/80 px-3 py-1.5 rounded-lg">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" /> 已建 (5)
+            <span className="w-2 h-2 rounded-full bg-emerald-400" /> 已建 ({statusCounts.built})
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-cyan-400" /> 在建 (3)
+            <span className="w-2 h-2 rounded-full bg-cyan-400" /> 在建 ({statusCounts.building})
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-slate-400" /> 规划 (3)
+            <span className="w-2 h-2 rounded-full bg-slate-400" /> 规划 ({statusCounts.planned})
           </span>
         </div>
       </div>

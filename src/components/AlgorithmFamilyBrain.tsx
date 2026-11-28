@@ -5,13 +5,19 @@ import { Brain, Cpu, Sparkles, Activity, ShieldAlert, Boxes, ChevronRight, Info 
 interface AlgorithmFamilyBrainProps {
   families: AlgorithmFamily[];
   onSelectFamily: (family: AlgorithmFamily) => void;
+  /** 知识图谱关联规则数，由能力节点数据推导后传入，不再手写 */
+  knowledgeRuleCount: number;
 }
 
 export const AlgorithmFamilyBrain: React.FC<AlgorithmFamilyBrainProps> = ({
   families,
   onSelectFamily,
+  knowledgeRuleCount,
 }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  // 算法族在用模型总数由各族 activeCount 求和推导，替代手写数字
+  const totalActiveModels = families.reduce((sum, family) => sum + family.activeCount, 0);
 
   const getFamilyIcon = (id: string) => {
     switch (id) {
@@ -47,7 +53,7 @@ export const AlgorithmFamilyBrain: React.FC<AlgorithmFamilyBrainProps> = ({
           <p className="text-[11px] text-slate-400">点击算法节点展开底层算法模型与推理树</p>
         </div>
         <span className="text-[11px] font-mono text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-2.5 py-1 rounded-md">
-          5 核心算法族
+          {families.length} 核心算法族
         </span>
       </div>
 
@@ -117,7 +123,9 @@ export const AlgorithmFamilyBrain: React.FC<AlgorithmFamilyBrainProps> = ({
       <div className="relative z-10 border-t border-slate-800/80 pt-3 flex items-center justify-between text-xs text-slate-400">
         <span className="flex items-center gap-1.5">
           <Info className="w-3.5 h-3.5 text-cyan-400" />
-          知识图谱关联规则: <span className="font-mono text-white font-bold">5,423 条</span>
+          在用模型: <span className="font-mono text-white font-bold">{totalActiveModels.toLocaleString()} 个</span>
+          <span className="text-slate-600">·</span>
+          知识图谱关联规则: <span className="font-mono text-white font-bold">{knowledgeRuleCount.toLocaleString()} 条</span>
         </span>
         <button
           onClick={() => onSelectFamily(families[0])}

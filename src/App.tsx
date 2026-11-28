@@ -70,6 +70,13 @@ export default function App() {
   const [kpis, setKpis] = useState(INITIAL_KPIS);
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
 
+  // 知识图谱关联规则数由能力节点数据推导，供算法族矩阵底部展示，不再手写
+  const knowledgeRuleCount = Number(
+    CAPABILITY_NODES.find((n) => n.id === 'cap-knowledge-graph')?.metrics.find(
+      (m) => m.label === '规则数'
+    )?.value ?? 0
+  );
+
   // Modals / Drawers
   const [selectedNode, setSelectedNode] = useState<CapabilityNode | null>(null);
   const [selectedFamily, setSelectedFamily] = useState<AlgorithmFamily | null>(null);
@@ -184,6 +191,7 @@ export default function App() {
               <div className="lg:col-span-4">
                 <AlgorithmFamilyBrain
                   families={ALGORITHM_FAMILIES}
+                  knowledgeRuleCount={knowledgeRuleCount}
                   onSelectFamily={(fam) => setSelectedFamily(fam)}
                 />
               </div>
